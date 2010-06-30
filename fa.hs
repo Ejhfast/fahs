@@ -1,4 +1,4 @@
-data Edge a = Edge {transition :: a, destination :: a } deriving Show
+data Edge a = Edge {transition :: a, destination :: Int } deriving Show
 data State a b = State {value :: a, edges :: [Edge b]} deriving Show
 data Amata a b = Amata {name :: String, states :: [State a b]} deriving Show
 
@@ -17,7 +17,7 @@ mapedges fa = map (\f -> edges f) (states fa)
 mapTransitions :: Amata a b -> [[b]]
 mapTransitions fa = map (\f -> map (\g -> transition g) f) (mapedges fa)
 
-mapDestinations :: Amata a b -> [[b]]
+mapDestinations :: Amata a b -> [[Int]]
 mapDestinations fa = map (\f -> map (\g -> destination g) f) (mapedges fa)
 
 getState :: Amata a b -> Int -> Maybe (State a b)
@@ -45,6 +45,16 @@ replaceState fa idx s =
 		Nothing ->
 			fa
 
+replaceValue :: Amata a b -> Int -> a -> Amata a b
+replaceValue fa idx val =
+	let curr_st = getState fa idx in
+	case curr_st of
+		Just st ->
+			let c_edges = edges st in
+			replaceState fa idx (State val c_edges)
+		Nothing -> 
+			fa
+
 replaceEdge :: Amata a b -> Int -> Int -> Edge b -> Amata a b
 replaceEdge fa s_idx e_idx e =
 	let curr_st = getState fa s_idx in
@@ -61,4 +71,3 @@ replaceEdge fa s_idx e_idx e =
 		Nothing ->
 			fa			
 
-		
