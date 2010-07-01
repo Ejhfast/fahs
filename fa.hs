@@ -9,9 +9,10 @@ data Amata a b = Amata {name :: String, states :: [State a b]} deriving Show
 
 main :: IO ()
 main = do
-	x <- getPercent 50 
-	if x then putStrLn "Hey," else putStrLn "Wha,"
-	putStrLn "Hello World\n"
+	pop <- mapM (\f -> buildAmata 8 ["T","F"] [0..8]) [0..100]
+	mutate <- mapM (\f -> mutateAmata f ["T","F"] [0..8]) pop
+	test <- mapM_ (\f -> putStrLn $ name f) mutate
+	putStrLn "Hello World"
 
 -- utilities
 
@@ -181,7 +182,7 @@ mutateAmata fa vals lang = do
 			on_edge <- pickNum 0 (edge_len-1)
 			new_e <- buildEdge (size-1) lang
 			return $ insertEdge fa on_state on_edge new_e
-		4 -> do -- deleteEdge
+		4 -> do -- delete Edge
 			let edge_len = length $ edges $ (states fa) !! on_state
 			on_edge <- pickNum 0 (edge_len-1)
 			return $ deleteEdge fa on_state on_edge
