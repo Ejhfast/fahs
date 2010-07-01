@@ -1,12 +1,42 @@
+import System.Random
+
 data Edge a = Edge {transition :: a, destination :: Int } deriving Show
 data State a b = State {value :: a, edges :: [Edge b]} deriving Show
 data Amata a b = Amata {name :: String, states :: [State a b]} deriving Show
+
+-- main
+
+main :: IO ()
+main = do
+	x <- getPercent 50 
+	if x then putStrLn "Hey," else putStrLn "Wha,"
+	putStrLn "Hello World\n"
+
+-- utilities
+
+getPercent :: Int -> IO Bool
+getPercent x = do
+	y <- getStdRandom (randomR (1,100))
+	return $ y < x
+
+pickNum :: Int -> Int -> IO Int
+pickNum min max = do
+	y <- getStdRandom (randomR (min,max))
+	return y
+
+chooseOfList :: [a] -> IO a
+chooseOfList lst = do
+	let len = length lst 
+	choice <- pickNum 0 $ (len-1)
+	return $ lst !! choice
 
 replace :: [a] -> Int -> a -> [a]
 replace lst idx e =
 	let (f,r) = splitAt idx lst in
 	let rest = drop 1 r in
 	if idx < length lst then f ++ [e] ++ rest else lst
+
+-- Fa functions
 
 mapvals :: Amata a b -> [a] 
 mapvals fa = map (\f -> value f) (states fa)
@@ -71,3 +101,6 @@ replaceEdge fa s_idx e_idx e =
 		Nothing ->
 			fa			
 
+-- buildAmata :: Int -> [a] -> [b] -> Amata a b
+-- buildAmata state_size vals lang =
+	
