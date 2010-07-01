@@ -9,6 +9,7 @@ data Amata a b = Amata {name :: String, states :: [State a b]} deriving Show
 main :: IO ()
 main = do
 	x <- getPercent 50 
+	y <- probFilter 50 [1,2,3,5] []
 	if x then putStrLn "Hey," else putStrLn "Wha,"
 	putStrLn "Hello World\n"
 
@@ -29,6 +30,20 @@ chooseOfList lst = do
 	let len = length lst 
 	choice <- pickNum 0 $ (len-1)
 	return $ lst !! choice
+
+probFilter :: Int -> [a] -> [a] -> IO [a]
+probFilter prob [] acc = return acc
+probFilter prob (x:xs) acc = do
+	yn <- getPercent prob
+	case yn of
+		True -> probFilter prob xs (x:acc) 
+		False -> probFilter prob xs acc
+
+mapIO :: (a -> IO b) -> [a] -> [b] -> IO [b]
+mapIO f [] acc = do return acc
+mapIO f (x:xs) acc = do
+	new <- f x
+	mapIO f xs (new:acc)
 
 replace :: [a] -> Int -> a -> [a]
 replace lst idx e =
@@ -101,6 +116,20 @@ replaceEdge fa s_idx e_idx e =
 		Nothing ->
 			fa			
 
--- buildAmata :: Int -> [a] -> [b] -> Amata a b
--- buildAmata state_size vals lang =
+
+buildAmata :: Int -> [a] -> [b] -> IO (Amata a b)
+buildAmata state_size vals lang = do
+	how_big <- pickNum 1 state_size
+	let states_to_be = [0..(how_big-1)]
+	states <- mapIO 
+		(\s -> do
+			value <- chooseOfList vals
+			new_edges <- probFilter 50 lang []
+			e_l <- mapIO 
+							(\n -> do
+								d <- pickNum 0 (state_size -1)
+								return $ Edge n d) new_edges []
+			return $ State value e_l) states_to_be []
+	return $ Amata "Random" states
+						
 	
