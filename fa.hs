@@ -37,6 +37,16 @@ replace lst idx e =
 	let rest = drop 1 r in
 	if idx < length lst then f ++ [e] ++ rest else lst
 
+insert :: [a] -> Int -> a -> [a]
+insert lst idx e =
+	let (f,r) = splitAt idx lst in
+	f ++ [e] ++ r
+
+delete :: [a] -> Int -> [a]
+delete lst idx =
+	let (f,r) = splitAt idx lst in
+	f ++ (drop 1 r)
+
 -- Fa functions
 
 mapvals :: Amata a b -> [a] 
@@ -76,6 +86,17 @@ replaceState fa idx s =
 		Nothing ->
 			fa
 
+insertState :: Amata a b -> Int -> State a b -> Amata a b
+insertState fa idx s =
+	let all = states fa in
+	let new_all = insert all idx s in
+	Amata (name fa) new_all
+
+deleteState :: Amata a b -> Int -> Amata a b
+deleteState fa idx =	
+	let all = states fa in
+	Amata (name fa) (delete all idx)
+
 replaceValue :: Amata a b -> Int -> a -> Amata a b
 replaceValue fa idx val =
 	let curr_st = getState fa idx in
@@ -113,6 +134,5 @@ buildAmata state_size vals lang = do
 					d <- pickNum 0 (state_size -1)
 					return $ Edge n d) new_edges
 			return $ State value e_l) states_to_be
-	return $ Amata "Random" states
-						
+	return $ Amata "Random" states						
 	
