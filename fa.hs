@@ -140,18 +140,41 @@ deleteEdge fa s_idx e_idx =
 			replaceState fa s_idx (State (value st) del_e)
 		Nothing -> fa
 
+buildEdge :: Int -> [b] -> IO (Edge b)
+buildEdge num_states lang = do
+	dest <- pickNum 0 (num_states - 1)
+	trans <- chooseOfList lang
+	return $ Edge trans dest
+
+buildEdgeList :: Int -> Int -> [b] -> IO [Edge b]
+buildEdgeList num_states num_edges lang = 
+	mapM (\e -> buildEdge num_states lang) [1..num_edges]
+
+buildState :: Int -> [a] -> [b] -> IO (State a b)
+buildState num_states vals lang = do
+	let len = length lang
+	new_v <- chooseOfList vals
+	num_e <- pickNum 1 len
+	new_el <- buildEdgeList num_states num_e lang
+	return $ State new_v new_el 
+
 buildAmata :: Int -> [a] -> [b] -> IO (Amata a b)
 buildAmata state_size vals lang = do
-	how_big <- pickNum 1 state_size
-	let states_to_be = [0..(how_big-1)]
-	states <- mapM 
-		(\s -> do
-			value <- chooseOfList vals
-			new_edges <- filterM (\f -> getPercent 50) lang
-			e_l <- mapM
-				(\n -> do
-					d <- pickNum 0 (state_size -1)
-					return $ Edge n d) new_edges
-			return $ State value e_l) states_to_be
+	how_big <- (pickNum 1 $ state_size -1)
+	let states_to_be = [0..how_big]
+	states <- mapM (\s -> buildState state_size vals lang) states_to_be
 	return $ Amata "Random" states						
-	
+
+mutateAmata :: (Amata a b) -> [a] -> [b] -> IO (Amata a b)
+mutateAmata fa vals lang = do
+	let size = length (states fa) 
+	choice <- pickNum 1 3
+	case choice of
+		1 -> do -- Insert State
+			new_s <- buildState size vals lang
+			return $ insertState fa size new_s
+		2 -> do -- delete State
+			to_del <- pickNum 0 (size-1)
+			return $ deleteState fa to_del
+		3 -> do -- insert Edge, todo
+			return $ fa
