@@ -168,13 +168,31 @@ buildAmata state_size vals lang = do
 mutateAmata :: (Amata a b) -> [a] -> [b] -> IO (Amata a b)
 mutateAmata fa vals lang = do
 	let size = length (states fa) 
-	choice <- pickNum 1 3
+	on_state <- pickNum 0 (size-1)
+	choice <- pickNum 1 6
 	case choice of
 		1 -> do -- Insert State
 			new_s <- buildState size vals lang
 			return $ insertState fa size new_s
 		2 -> do -- delete State
-			to_del <- pickNum 0 (size-1)
-			return $ deleteState fa to_del
-		3 -> do -- insert Edge, todo
-			return $ fa
+			return $ deleteState fa on_state
+		3 -> do -- insert Edge
+			let edge_len = length $ edges $ (states fa) !! on_state
+			on_edge <- pickNum 0 (edge_len-1)
+			new_e <- buildEdge (size-1) lang
+			return $ insertEdge fa on_state on_edge new_e
+		4 -> do -- deleteEdge
+			let edge_len = length $ edges $ (states fa) !! on_state
+			on_edge <- pickNum 0 (edge_len-1)
+			return $ deleteEdge fa on_state on_edge
+		5 -> do -- change state value
+			new_val <- chooseOfList vals
+			return $ replaceValue fa on_state new_val
+		6 -> do -- replace edge
+			let edge_len = length $ edges $ (states fa) !! on_state
+			on_edge <- pickNum 0 (edge_len-1)
+			new_e <- buildEdge (size-1) lang
+			return $ replaceEdge fa on_state on_edge new_e
+				
+			
+			
