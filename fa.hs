@@ -97,8 +97,7 @@ replaceValue fa idx val =
 		Just st ->
 			let c_edges = edges st in
 			replaceState fa idx (State val c_edges)
-		Nothing -> 
-			fa
+		Nothing -> fa
 
 replaceEdge :: Amata a b -> Int -> Int -> Edge b -> Amata a b
 replaceEdge fa s_idx e_idx e =
@@ -111,10 +110,8 @@ replaceEdge fa s_idx e_idx e =
 				Just ed ->
 					let new = replace all_e e_idx e in
 					replaceState fa s_idx (State (value st) new)
-				Nothing ->
-					fa
-		Nothing ->
-			fa			
+				Nothing -> fa
+		Nothing -> fa			
 
 
 buildAmata :: Int -> [a] -> [b] -> IO (Amata a b)
@@ -126,9 +123,9 @@ buildAmata state_size vals lang = do
 			value <- chooseOfList vals
 			new_edges <- probFilter 50 lang []
 			e_l <- mapIO 
-							(\n -> do
-								d <- pickNum 0 (state_size -1)
-								return $ Edge n d) new_edges []
+				(\n -> do
+					d <- pickNum 0 (state_size -1)
+					return $ Edge n d) new_edges []
 			return $ State value e_l) states_to_be []
 	return $ Amata "Random" states
 						
