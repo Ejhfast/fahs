@@ -120,6 +120,25 @@ replaceEdge fa s_idx e_idx e =
 				Nothing -> fa
 		Nothing -> fa			
 
+insertEdge :: Amata a b -> Int -> Int -> Edge b -> Amata a b
+insertEdge fa s_idx e_idx e =
+	let curr_st = getState fa s_idx in
+	case curr_st of
+		Just st ->
+			let all_e = edges st in
+			let new_e = insert all_e e_idx e in
+			replaceState fa s_idx (State (value st) new_e)
+		Nothing -> fa
+
+deleteEdge :: Amata a b -> Int -> Int -> Amata a b
+deleteEdge fa s_idx e_idx =	
+	let curr_st = getState fa s_idx in
+	case curr_st of
+		Just st ->
+			let all_e = edges st in
+			let del_e = delete all_e e_idx in
+			replaceState fa s_idx (State (value st) del_e)
+		Nothing -> fa
 
 buildAmata :: Int -> [a] -> [b] -> IO (Amata a b)
 buildAmata state_size vals lang = do
