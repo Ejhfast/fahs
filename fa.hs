@@ -11,7 +11,8 @@ main :: IO ()
 main = do
 	pop <- mapM (\f -> buildAmata 8 ["T","F"] [0..8]) [0..100]
 	mutate <- mapM (\f -> mutateAmata f ["T","F"] [0..8]) pop
-	test <- mapM_ (\f -> putStrLn $ name f) mutate
+	let res = map (\f -> runAmataList f 0 [1,1,1,0,0,0,1,0]) mutate
+	let x = res !! 34
 	putStrLn "Hello World"
 
 -- utilities
@@ -155,7 +156,14 @@ runAmata fa curr_state new_input =
 									Nothing -> Just (c_val, curr_state)
 					[] -> Just (c_val, curr_state)
 		Nothing -> Nothing
-	
+
+runAmataList :: (Eq b) => (Amata a b) -> Int -> [b] -> Maybe (a, Int)
+runAmataList fa curr_state inputlist =
+	let start_val = value $ states fa !! 0 in 
+		foldl (\acc g -> 
+			case acc of
+				Just (v,s) -> runAmata fa s g
+				Nothing -> Nothing) (Just (start_val,0)) inputlist
 
 buildEdge :: Int -> [b] -> IO (Edge b)
 buildEdge num_states lang = do
