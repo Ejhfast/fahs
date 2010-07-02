@@ -2,6 +2,7 @@ module Amata.Automata
 ( Amata(..)
 , State(..)
 , Edge(..)
+, STrack
 , buildAmata
 , runAmata
 , runAmataList
@@ -12,6 +13,7 @@ import System.Random
 import Control.Monad
 import Amata.Utilities
 
+type STrack a = (a, Int) -- Track, functionally, the current state of an FA
 data Edge a = Edge {transition :: a, destination :: Int } deriving Show
 data State a b = State {value :: a, edges :: [Edge b]} deriving Show
 data Amata a b = Amata {name :: String, states :: [State a b]} deriving Show
@@ -95,7 +97,7 @@ deleteEdge fa s_idx e_idx =
 			replaceState fa s_idx (State (value st) del_e)
 		Nothing -> fa
 
-runAmata :: (Eq b) => (Amata a b) -> Int -> b -> Maybe (a,Int)
+runAmata :: (Eq b) => (Amata a b) -> Int -> b -> Maybe (STrack a)
 runAmata fa curr_state new_input =
 	let c_state = getState fa curr_state in
 	case c_state of
@@ -110,7 +112,7 @@ runAmata fa curr_state new_input =
 					[] -> Just (c_val, curr_state)
 		Nothing -> Nothing
 
-runAmataList :: (Eq b) => (Amata a b) -> Int -> [b] -> Maybe (a, Int)
+runAmataList :: (Eq b) => (Amata a b) -> Int -> [b] -> Maybe (STrack a)
 runAmataList fa curr_state inputlist =
 	let start_val = value $ states fa !! 0 in 
 		foldl (\acc g -> 
