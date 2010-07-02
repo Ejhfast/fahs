@@ -1,67 +1,20 @@
+module Amata.Automata
+( Amata(..)
+, State(..)
+, Edge(..)
+, buildAmata
+, runAmata
+, runAmataList
+, mutateAmata
+) where
+ 
 import System.Random
 import Control.Monad
+import Amata.Utilities
 
 data Edge a = Edge {transition :: a, destination :: Int } deriving Show
 data State a b = State {value :: a, edges :: [Edge b]} deriving Show
 data Amata a b = Amata {name :: String, states :: [State a b]} deriving Show
-
--- main
-
-main :: IO ()
-main = do
-	pop <- mapM (\f -> buildAmata 8 ["T","F"] [0..8]) [0..100]
-	mutate <- mapM (\f -> mutateAmata f ["T","F"] [0..8]) pop
-	let res = map (\f -> runAmataList f 0 [1,1,1,0,0,0,1,0]) mutate
-	let x = res !! 34
-	putStrLn "Hello World"
-
--- utilities
-
-getPercent :: Int -> IO Bool
-getPercent x = do
-	y <- getStdRandom (randomR (1,100))
-	return $ y < x
-
-pickNum :: Int -> Int -> IO Int
-pickNum min max = do
-	y <- getStdRandom (randomR (min,max))
-	return y
-
-chooseOfList :: [a] -> IO a
-chooseOfList lst = do
-	let len = length lst 
-	choice <- pickNum 0 $ (len-1)
-	return $ lst !! choice
-
-replace :: [a] -> Int -> a -> [a]
-replace lst idx e =
-	let (f,r) = splitAt idx lst in
-	let rest = drop 1 r in
-	if idx < length lst then f ++ [e] ++ rest else lst
-
-insert :: [a] -> Int -> a -> [a]
-insert lst idx e =
-	let (f,r) = splitAt idx lst in
-	f ++ [e] ++ r
-
-delete :: [a] -> Int -> [a]
-delete lst idx =
-	let (f,r) = splitAt idx lst in
-	f ++ (drop 1 r)
-
--- Fa functions
-
-mapvals :: Amata a b -> [a] 
-mapvals fa = map (\f -> value f) (states fa)
-
-mapedges :: Amata a b -> [[Edge b]]
-mapedges fa = map (\f -> edges f) (states fa)
-
-mapTransitions :: Amata a b -> [[b]]
-mapTransitions fa = map (\f -> map (\g -> transition g) f) (mapedges fa)
-
-mapDestinations :: Amata a b -> [[Int]]
-mapDestinations fa = map (\f -> map (\g -> destination g) f) (mapedges fa)
 
 getState :: Amata a b -> Int -> Maybe (State a b)
 getState fa idx = 
