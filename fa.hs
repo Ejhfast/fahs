@@ -141,6 +141,22 @@ deleteEdge fa s_idx e_idx =
 			replaceState fa s_idx (State (value st) del_e)
 		Nothing -> fa
 
+runAmata :: (Eq b) => (Amata a b) -> Int -> b -> Maybe (a,Int)
+runAmata fa curr_state new_input =
+	let c_state = getState fa curr_state in
+	case c_state of
+		Just (State c_val c_edges) ->
+			let validEdge = filter (\f -> transition f == new_input) c_edges in
+				case validEdge of
+					(Edge trans dest):rest -> 
+						let next_state = getState fa dest in
+							case next_state of
+									Just (State n_val n_edges) -> Just (n_val,dest)
+									Nothing -> Just (c_val, curr_state)
+					[] -> Just (c_val, curr_state)
+		Nothing -> Nothing
+	
+
 buildEdge :: Int -> [b] -> IO (Edge b)
 buildEdge num_states lang = do
 	dest <- pickNum 0 (num_states - 1)
