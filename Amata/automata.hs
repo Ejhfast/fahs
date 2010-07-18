@@ -4,6 +4,7 @@ module Amata.Automata
 , Edge(..)
 , STrack
 , buildAmata
+, getState
 , runAmata
 , runAmataList
 , mutateAmata
